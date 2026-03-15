@@ -10,5 +10,5 @@ typedef struct MatrixInfo {
     void (*print)(const void*);
 } MatrixInfo;
 
-MatrixInfo* GetDoubleFieldInfo();
-MatrixInfo* GetComplexFieldInfo();
+MatrixInfo* get_double_matrix_info();
+MatrixInfo* get_complex_matrix_info();

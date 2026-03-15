@@ -1,6 +1,7 @@
 #include "matrix.h"
 #include "stdio.h"
 #include "stdlib.h"
+#include "string.h"
 
 struct Matrix {
     int rows;
@@ -18,16 +19,35 @@ Matrix* matrix_create(int rows, int cols, MatrixInfo* field) {
     return m;
 }
 
-Matrix* matrix_multiply(Matrix* a, Matrix* b) {
-    if (a->cols != b->rows || a->field != b->field) return NULL;
+Matrix* matrix_multiply(Matrix* a, Matrix* b, ErrorCode* err) {
+    if (!a || !b) {
+        if (err) *err = ERROR_NULL_POINTER;
+        return NULL;
+    }
+    if (a->field != b->field) {
+        if (err) *err = ERROR_TYPE_MISMATCH;
+        return NULL;
+    }
+    if (a->cols != b->rows) {
+        if (err) *err = ERROR_DIMENSION_MISMATCH;
+        return NULL;
+    }
 
     Matrix* res = matrix_create(a->rows, b->cols, a->field);
+
+    if (!res) {
+        if (err) *err = ERROR_MEMORY_ALLOCATION;
+        return NULL;
+    }
+
     for (int i = 0; i < a->rows; i++) {
         for (int j = 0; j < b->cols; j++) {
             void* sum = NULL;
             for (int k = 0; k < a->cols; k++) {
-                void* vA = matrix_get(a, i, k);
-                void* vB = matrix_get(b, k, j);
+                void* vA = matrix_get(a, i, k, err);
+                if (err != SUCCESS) return NULL;
+                void* vB = matrix_get(b, k, j, err);
+                if (err != SUCCESS) return NULL;
                 if (!vA || !vB) continue;
 
                 void* prod = a->field->multiplication(vA, vB);
@@ -44,30 +64,57 @@ Matrix* matrix_multiply(Matrix* a, Matrix* b) {
             }
         }
     }
+
+    if (err) *err = SUCCESS;
     return res;
 }
 
-Matrix* matrix_add(Matrix* a, Matrix* b) {
-    if (a->rows != b->rows || a->cols != b->cols) return NULL;
-
+Matrix* matrix_add(Matrix* a, Matrix* b, ErrorCode* err) {
+    if (!a || !b) {
+        if (err) *err = ERROR_NULL_POINTER;
+        return NULL;
+    }
     if (a->field != b->field) {
-        fprintf(stderr, "Error: Type mismatch!\n"); // это попозже в io и убрать инклююд
+        if (err) *err = ERROR_TYPE_MISMATCH; 
+        return NULL;
+    }
+    if (a->rows != b->rows || a->cols != b->cols) {
+        if (err) *err = ERROR_DIMENSION_MISMATCH;
         return NULL;
     }
 
     Matrix* res = matrix_create(a->rows, a->cols, a->field);
+
+    if (!res) {
+        if (err) *err = ERROR_MEMORY_ALLOCATION;
+        return NULL;
+    }
+
     for (int i = 0; i < a->rows * a->cols; i++) {
         if (a->data[i] && b->data[i])
             res->data[i] = a->field->add(a->data[i], b->data[i]);
     }
+    if (err) *err = SUCCESS;
     return res;
 }
 
-Matrix* matrix_transpose(Matrix* m) {
+Matrix* matrix_transpose(Matrix* m, ErrorCode* err) {
+    if (!m) {
+        if (err) *err = ERROR_NULL_POINTER;
+        return NULL;
+    }
+
     Matrix* res = matrix_create(m->cols, m->rows, m->field);
+
+    if (!res) {
+        if (err) *err = ERROR_MEMORY_ALLOCATION;
+        return NULL;
+    }
+
     for (int i = 0; i < m->rows; i++) {
         for (int j = 0; j < m->cols; j++) {
-            void* val = matrix_get(m, i, j);
+            void* val = matrix_get(m, i, j, err);
+            if (err != SUCCESS) return NULL;
             if (val) {
                 void* copy = malloc(m->field->size);
                 memcpy(copy, val, m->field->size);
@@ -75,20 +122,50 @@ Matrix* matrix_transpose(Matrix* m) {
             }
         }
     }
+    if (err) *err = SUCCESS;
     return res;
 }
 
-int matrix_set(Matrix* m, int r, int c, void* value) {
-    if (r < 0 || r >= m->rows || c < 0 || c >= m->cols) return -1;
-    int idx = r * m->cols + c;
-    if (m->data[idx]) free(m->data[idx]);
-    m->data[idx] = malloc(m->field->size);
-    memcpy(m->data[idx], value, m->field->size);
+int matrix_set(Matrix* m, int r, int c, void* value, ErrorCode* err) {
+    if (!m || !value) {
+        if (err) *err = ERROR_NULL_POINTER;
+        return -1;
+    }
+    if (r < 0 || r >= m->rows || c < 0 || c >= m->cols) {
+        if (err) *err = ERROR_OUT_OF_BOUNDS;
+        return -1;
+    }
+
+    int index = r * m->cols + c;
+
+    if (m->data[index] != NULL) {
+        free(m->data[index]);
+    }
+
+    m->data[index] = malloc(m->field->size);
+
+    if (!m->data[index]) {
+        if (err) *err = ERROR_MEMORY_ALLOCATION;
+        return -1;
+    }
+
+    memcpy(m->data[index], value, m->field->size);
+
+    if (err) *err = SUCCESS;
     return 0;
 }
 
-void* matrix_get(Matrix* m, int r, int c) {
-    if (r < 0 || r >= m->rows || c < 0 || c >= m->cols) return NULL;
+void* matrix_get(Matrix* m, int r, int c, ErrorCode* err) {
+    if (!m) {
+        if (err) *err = ERROR_NULL_POINTER;
+        return NULL;
+    }
+    if (r < 0 || r >= m->rows || c < 0 || c >= m->cols) {
+        if (err) *err = ERROR_OUT_OF_BOUNDS;
+        return NULL;
+    }
+
+    if (err) *err = SUCCESS;
     return m->data[r * m->cols + c];
 }
 
@@ -100,14 +177,21 @@ void matrix_free(Matrix* m) {
     free(m);
 }
 
-void matrix_print(Matrix* m) {
+void matrix_print(Matrix* m, ErrorCode* err) {
+    if (!m) {
+        if (err) *err = ERROR_NULL_POINTER;
+        return;
+    }
+    
     for (int i = 0; i < m->rows; i++) {
         for (int j = 0; j < m->cols; j++) {
-            void* val = matrix_get(m, i, j);
+            void* val = matrix_get(m, i, j, err);
+            if (err != SUCCESS) return;
             if (val) m->field->print(val);
             else printf(" 0 ");
             printf(" ");
         }
         printf("\n");
     }
+    if (err) *err = SUCCESS;
 }

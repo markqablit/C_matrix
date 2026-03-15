@@ -24,7 +24,7 @@ static void* double_multiplication(const void* a, const void* b) {
 
 static void double_print(const void* a) { printf("%f.2", *(double*)a); }
 
-MatrixInfo* GetIntFieldInfo() {
+MatrixInfo* get_double_matrix_info() {
     static MatrixInfo* setup = NULL;
     if (!setup) {
         setup = (MatrixInfo*)(malloc(sizeof(MatrixInfo)));
@@ -60,7 +60,7 @@ static void complex_print(const void* a) {
     c_print(c);
 }
 
-MatrixInfo* GetComplexFieldInfo() {
+MatrixInfo* get_complex_matrix_info() {
     static MatrixInfo* setup = NULL;
     if (!setup){
         setup = (MatrixInfo*)(malloc(sizeof(MatrixInfo)));
