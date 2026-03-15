@@ -22,6 +22,7 @@ Complex* c_muttiplication(const Complex* a, const Complex* b) {
     res->imag = a->real * b->imag + a->imag * b->real;
     return res;
 }
+
 void c_print(const Complex* a) {
     printf("%.2f + %.2fi", a->real, a->imag);
 }

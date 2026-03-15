@@ -8,4 +8,4 @@ typedef struct {
 Complex* c_add(const Complex* a, const Complex* b);
 Complex* c_deduct(const Complex* a, const Complex* b);
 Complex* c_muttiplication(const Complex* a, const Complex* b);
-void c_print(const void* a);
+void c_print(const Complex* a);

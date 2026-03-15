@@ -12,6 +12,7 @@ set(SOURCES
     ${SRC_DIR}/matrix.c
     ${SRC_DIR}/matrix_info.c
     ${SRC_DIR}/complex_num.c
+    ${SRC_DIR}/io.c
 )
 
 add_executable(MatrixLab ${SOURCES})

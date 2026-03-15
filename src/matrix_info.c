@@ -22,7 +22,7 @@ static void* double_multiplication(const void* a, const void* b) {
     return res;
 }
 
-static void double_print(const void* a) { printf("%f.2", *(double*)a); }
+static void double_print(const void* a) { printf("%.2f", *(double*)a); }
 
 MatrixInfo* get_double_matrix_info() {
     static MatrixInfo* setup = NULL;

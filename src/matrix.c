@@ -45,9 +45,15 @@ Matrix* matrix_multiply(Matrix* a, Matrix* b, ErrorCode* err) {
             void* sum = NULL;
             for (int k = 0; k < a->cols; k++) {
                 void* vA = matrix_get(a, i, k, err);
-                if (err != SUCCESS) return NULL;
+                if (*err != SUCCESS) {
+                    matrix_free(res);
+                    return NULL;
+                }
                 void* vB = matrix_get(b, k, j, err);
-                if (err != SUCCESS) return NULL;
+                if (*err != SUCCESS) {
+                    matrix_free(res);
+                    return NULL;
+                }
                 if (!vA || !vB) continue;
 
                 void* prod = a->field->multiplication(vA, vB);
@@ -114,7 +120,10 @@ Matrix* matrix_transpose(Matrix* m, ErrorCode* err) {
     for (int i = 0; i < m->rows; i++) {
         for (int j = 0; j < m->cols; j++) {
             void* val = matrix_get(m, i, j, err);
-            if (err != SUCCESS) return NULL;
+            if (*err != SUCCESS) {
+                matrix_free(res);
+                return NULL;
+            }
             if (val) {
                 void* copy = malloc(m->field->size);
                 memcpy(copy, val, m->field->size);
@@ -170,6 +179,7 @@ void* matrix_get(Matrix* m, int r, int c, ErrorCode* err) {
 }
 
 void matrix_free(Matrix* m) {
+    if (!m) return;
     for (int i = 0; i < m->rows * m->cols; i++) {
         if (m->data[i]) free(m->data[i]);
     }
@@ -182,16 +192,21 @@ void matrix_print(Matrix* m, ErrorCode* err) {
         if (err) *err = ERROR_NULL_POINTER;
         return;
     }
+
+    ErrorCode temp_err = SUCCESS;
     
     for (int i = 0; i < m->rows; i++) {
         for (int j = 0; j < m->cols; j++) {
-            void* val = matrix_get(m, i, j, err);
-            if (err != SUCCESS) return;
+            void* val = matrix_get(m, i, j, &temp_err);
+            if (temp_err != SUCCESS) {
+                if (err) *err = temp_err;
+                return;
+            }
             if (val) m->field->print(val);
-            else printf(" 0 ");
+            else printf("0");
             printf(" ");
         }
-        printf("\n");
+        puts("");
     }
     if (err) *err = SUCCESS;
 }
