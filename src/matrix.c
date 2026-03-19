@@ -6,7 +6,7 @@
 struct Matrix {
     int rows;
     int cols;
-    void** data;      
+    void* data;      
     MatrixInfo* field; 
 };
 

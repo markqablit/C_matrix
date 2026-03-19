@@ -14,11 +14,5 @@ $(TEST_TARGET): $(TEST_SRC) $(PROJECT_SRCS)
 run: $(TEST_TARGET)
 	./$(TEST_TARGET)
 
-verbose: $(TEST_TARGET)
-	./$(TEST_TARGET) --verbose
-
-check-syntax:
-	$(CC) $(CFLAGS) -fsyntax-only $(TEST_SRC) $(PROJECT_SRCS)
-
 clean:
 	-del /Q $(TEST_TARGET) *.o 2>nul || rm -f $(TEST_TARGET) *.o

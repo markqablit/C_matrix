@@ -1,7 +1,6 @@
 #include "matrix_info.h"
 #include "complex_num.h"
 #include "stdlib.h"
-#include "stdio.h"
 
 
 static void* double_add(const void* a, const void* b) {
