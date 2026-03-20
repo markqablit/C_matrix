@@ -14,32 +14,32 @@
 
 START_TEST(test_double_matrix_create) {
     MatrixInfo* info = get_double_matrix_info();
-    Matrix* m = matrix_create(3, 3, info);
-    
+    ErrorCode err = SUCCESS;
+    Matrix* m = matrix_create(3, 3, info, &err);
+    ck_assert_int_eq(err, SUCCESS);
     ck_assert_ptr_nonnull(m);
 
-    ErrorCode err = SUCCESS;
     double val = 5.5;
-    int set_result = matrix_set(m, 2, 2, &val, &err);
-    ck_assert_int_eq(set_result, 0);
+    matrix_set(m, 2, 2, &val, &err);
     ck_assert_int_eq(err, SUCCESS);
     
     double* get_result = (double*)matrix_get(m, 2, 2, &err);
     ck_assert_ptr_nonnull(get_result);
     ck_assert_double_eq(*get_result, 5.5);
     
-    matrix_free(m);
+    matrix_free(m, &err);
+    ck_assert_int_eq(err, SUCCESS);
 }
 END_TEST
 
 START_TEST(test_double_matrix_set_get) {
     ErrorCode err = SUCCESS;
     MatrixInfo* info = get_double_matrix_info();
-    Matrix* m = matrix_create(3, 3, info);
-    
+    Matrix* m = matrix_create(3, 3, info, &err);
+    ck_assert_int_eq(err, SUCCESS);
+
     double value = 5.5;
-    int set_result = matrix_set(m, 1, 1, &value, &err);
-    ck_assert_int_eq(set_result, 0);
+    matrix_set(m, 1, 1, &value, &err);
     ck_assert_int_eq(err, SUCCESS);
     
     double* result = (double*)matrix_get(m, 1, 1, &err);
@@ -47,29 +47,33 @@ START_TEST(test_double_matrix_set_get) {
     ck_assert_int_eq(err, SUCCESS);
     ck_assert_double_eq(*result, 5.5);
     
-    matrix_free(m);
+    matrix_free(m, &err);
+    ck_assert_int_eq(err, SUCCESS);
 }
 END_TEST
 
 START_TEST(test_double_matrix_set_out_of_bounds) {
     ErrorCode err = SUCCESS;
     MatrixInfo* info = get_double_matrix_info();
-    Matrix* m = matrix_create(3, 3, info);
-    
+    Matrix* m = matrix_create(3, 3, info, &err);
+    ck_assert_int_eq(err, SUCCESS);
+
     double value = 5.5;
-    int result = matrix_set(m, 10, 10, &value, &err);
-    ck_assert_int_eq(result, -1);
+    matrix_set(m, 10, 10, &value, &err);
     ck_assert_int_eq(err, ERROR_OUT_OF_BOUNDS);
     
-    matrix_free(m);
+    matrix_free(m, &err);
+    ck_assert_int_eq(err, SUCCESS);
 }
 END_TEST
 
 START_TEST(test_double_matrix_add) {
     ErrorCode err = SUCCESS;
     MatrixInfo* info = get_double_matrix_info();
-    Matrix* m1 = matrix_create(2, 2, info);
-    Matrix* m2 = matrix_create(2, 2, info);
+    Matrix* m1 = matrix_create(2, 2, info, &err);
+    ck_assert_int_eq(err, SUCCESS);
+    Matrix* m2 = matrix_create(2, 2, info, &err);
+    ck_assert_int_eq(err, SUCCESS);
     
     double val1 = 1.0, val2 = 2.0;
     matrix_set(m1, 0, 0, &val1, &err);
@@ -89,17 +93,22 @@ START_TEST(test_double_matrix_add) {
     double* res = (double*)matrix_get(sum, 0, 0, &err);
     ck_assert_double_eq(*res, 3.0);
     
-    matrix_free(m1);
-    matrix_free(m2);
-    matrix_free(sum);
+    matrix_free(m1, &err);
+    ck_assert_int_eq(err, SUCCESS);
+    matrix_free(m2, &err);
+    ck_assert_int_eq(err, SUCCESS);
+    matrix_free(sum, &err);
+    ck_assert_int_eq(err, SUCCESS);
 }
 END_TEST
 
 START_TEST(test_double_matrix_multiply) {
     ErrorCode err = SUCCESS;
     MatrixInfo* info = get_double_matrix_info();
-    Matrix* a = matrix_create(2, 3, info);
-    Matrix* b = matrix_create(3, 2, info);
+    Matrix* a = matrix_create(2, 3, info, &err);
+    ck_assert_int_eq(err, SUCCESS);
+    Matrix* b = matrix_create(3, 2, info, &err);
+    ck_assert_int_eq(err, SUCCESS);
     
     double val = 1.0;
     for (int i = 0; i < 2; i++) {
@@ -130,23 +139,26 @@ START_TEST(test_double_matrix_multiply) {
     ck_assert_double_eq_tol(*res10, 139.0, 0.001);
     ck_assert_double_eq_tol(*res11, 154.0, 0.001);
     
-    matrix_free(a);
-    matrix_free(b);
-    matrix_free(result);
+    matrix_free(a, &err);
+    ck_assert_int_eq(err, SUCCESS);
+    matrix_free(b, &err);
+    ck_assert_int_eq(err, SUCCESS);
+    matrix_free(result, &err);
+    ck_assert_int_eq(err, SUCCESS);
 }
 END_TEST
 
 
 START_TEST(test_complex_matrix_create) {
+    ErrorCode err = SUCCESS;
     MatrixInfo* info = get_complex_matrix_info();
-    Matrix* m = matrix_create(3, 3, info);
+    Matrix* m = matrix_create(3, 3, info, &err);
+    ck_assert_int_eq(err, SUCCESS);
     
     ck_assert_ptr_nonnull(m);
     
-    ErrorCode err = SUCCESS;
     Complex val = {1.0, 2.0};
-    int set_result = matrix_set(m, 2, 2, &val, &err);
-    ck_assert_int_eq(set_result, 0);
+    matrix_set(m, 2, 2, &val, &err);
     ck_assert_int_eq(err, SUCCESS);
     
     Complex* get_result = (Complex*)matrix_get(m, 2, 2, &err);
@@ -154,14 +166,16 @@ START_TEST(test_complex_matrix_create) {
     ck_assert_double_eq(get_result->real, 1.0);
     ck_assert_double_eq(get_result->imag, 2.0);
     
-    matrix_free(m);
+    matrix_free(m, &err);
+    ck_assert_int_eq(err, SUCCESS);
 }
 END_TEST
 
 START_TEST(test_complex_matrix_set_get) {
     ErrorCode err = SUCCESS;
     MatrixInfo* info = get_complex_matrix_info();
-    Matrix* m = matrix_create(2, 2, info);
+    Matrix* m = matrix_create(2, 2, info, &err);
+    ck_assert_int_eq(err, SUCCESS);
     
     Complex val = {1.5, 2.5};
     matrix_set(m, 0, 0, &val, &err);
@@ -173,15 +187,18 @@ START_TEST(test_complex_matrix_set_get) {
     ck_assert_double_eq(result->real, 1.5);
     ck_assert_double_eq(result->imag, 2.5);
     
-    matrix_free(m);
+    matrix_free(m, &err);
+    ck_assert_int_eq(err, SUCCESS);
 }
 END_TEST
 
 START_TEST(test_complex_matrix_add) {
     ErrorCode err = SUCCESS;
     MatrixInfo* info = get_complex_matrix_info();
-    Matrix* m1 = matrix_create(2, 2, info);
-    Matrix* m2 = matrix_create(2, 2, info);
+    Matrix* m1 = matrix_create(2, 2, info, &err);
+    ck_assert_int_eq(err, SUCCESS);
+    Matrix* m2 = matrix_create(2, 2, info, &err);
+    ck_assert_int_eq(err, SUCCESS);
     
     Complex val1 = {1.0, 2.0};
     Complex val2 = {3.0, 4.0};
@@ -197,9 +214,12 @@ START_TEST(test_complex_matrix_add) {
     ck_assert_double_eq(sum->real, 4.0);
     ck_assert_double_eq(sum->imag, 6.0);
     
-    matrix_free(m1);
-    matrix_free(m2);
-    matrix_free(result);
+    matrix_free(m1, &err);
+    ck_assert_int_eq(err, SUCCESS);
+    matrix_free(m2, &err);
+    ck_assert_int_eq(err, SUCCESS);
+    matrix_free(result, &err);
+    ck_assert_int_eq(err, SUCCESS);
 }
 END_TEST
 
@@ -207,8 +227,10 @@ START_TEST(test_complex_matrix_multiply) {
     ErrorCode err = SUCCESS;
     Complex val;
     MatrixInfo* info = get_complex_matrix_info();
-    Matrix* a = matrix_create(2, 2, info);
-    Matrix* b = matrix_create(2, 2, info);
+    Matrix* a = matrix_create(2, 2, info, &err);
+    ck_assert_int_eq(err, SUCCESS);
+    Matrix* b = matrix_create(2, 2, info, &err);
+    ck_assert_int_eq(err, SUCCESS);
 
     val = (Complex){1, 2}; matrix_set(a, 0, 0, &val, &err);
     val = (Complex){3, 4}; matrix_set(a, 0, 1, &val, &err);
@@ -240,9 +262,12 @@ START_TEST(test_complex_matrix_multiply) {
     ck_assert_double_eq_tol(res11->real, -40.0, 0.001);
     ck_assert_double_eq_tol(res11->imag, 358.0, 0.001);
     
-    matrix_free(a);
-    matrix_free(b);
-    matrix_free(result);
+    matrix_free(a, &err);
+    ck_assert_int_eq(err, SUCCESS);
+    matrix_free(b, &err);
+    ck_assert_int_eq(err, SUCCESS);
+    matrix_free(result, &err);
+    ck_assert_int_eq(err, SUCCESS);
 }
 END_TEST
 
@@ -250,7 +275,8 @@ END_TEST
 START_TEST(test_null_pointer_errors) {
     ErrorCode err = SUCCESS;
     MatrixInfo* info = get_double_matrix_info();
-    Matrix* m = matrix_create(2, 2, info);
+    Matrix* m = matrix_create(2, 2, info, &err);
+    ck_assert_int_eq(err, SUCCESS);
     
     Matrix* result = matrix_add(NULL, m, &err);
     ck_assert_ptr_null(result);
@@ -266,7 +292,8 @@ START_TEST(test_null_pointer_errors) {
     ck_assert_ptr_null(val);
     ck_assert_int_eq(err, ERROR_NULL_POINTER);
     
-    matrix_free(m);
+    matrix_free(m, &err);
+    ck_assert_int_eq(err, SUCCESS);
 }
 END_TEST
 
@@ -275,37 +302,46 @@ START_TEST(test_type_mismatch) {
     MatrixInfo* double_info = get_double_matrix_info();
     MatrixInfo* complex_info = get_complex_matrix_info();
     
-    Matrix* m_double = matrix_create(2, 2, double_info);
-    Matrix* m_complex = matrix_create(2, 2, complex_info);
+    Matrix* m_double = matrix_create(2, 2, double_info, &err);
+    ck_assert_int_eq(err, SUCCESS);
+    Matrix* m_complex = matrix_create(2, 2, complex_info, &err);
+    ck_assert_int_eq(err, SUCCESS);
     
     Matrix* result = matrix_add(m_double, m_complex, &err);
     ck_assert_ptr_null(result);
     ck_assert_int_eq(err, ERROR_TYPE_MISMATCH);
     
-    matrix_free(m_double);
-    matrix_free(m_complex);
+    matrix_free(m_double, &err);
+    ck_assert_int_eq(err, SUCCESS);
+    matrix_free(m_complex, &err);
+    ck_assert_int_eq(err, SUCCESS);
 }
 END_TEST
 
 START_TEST(test_dimension_mismatch) {
     ErrorCode err = SUCCESS;
     MatrixInfo* info = get_double_matrix_info();
-    Matrix* m1 = matrix_create(2, 2, info);
-    Matrix* m2 = matrix_create(3, 3, info);
+    Matrix* m1 = matrix_create(2, 2, info, &err);
+    ck_assert_int_eq(err, SUCCESS);
+    Matrix* m2 = matrix_create(3, 3, info, &err);
+    ck_assert_int_eq(err, SUCCESS);
     
     Matrix* result = matrix_add(m1, m2, &err);
     ck_assert_ptr_null(result);
     ck_assert_int_eq(err, ERROR_DIMENSION_MISMATCH);
     
-    matrix_free(m1);
-    matrix_free(m2);
+    matrix_free(m1, &err);
+    ck_assert_int_eq(err, SUCCESS);
+    matrix_free(m2, &err);
+    ck_assert_int_eq(err, SUCCESS);
 }
 END_TEST
 
 START_TEST(test_matrix_transpose) {
     ErrorCode err = SUCCESS;
     MatrixInfo* info = get_double_matrix_info();
-    Matrix* m = matrix_create(2, 3, info);
+    Matrix* m = matrix_create(2, 3, info, &err);
+    ck_assert_int_eq(err, SUCCESS);
     
     double val = 1.0;
     for (int i = 0; i < 2; i++) {
@@ -327,8 +363,10 @@ START_TEST(test_matrix_transpose) {
     ck_assert_double_eq(*t01, 4.0);
     ck_assert_double_eq(*t10, 2.0);
     
-    matrix_free(m);
-    matrix_free(transposed);
+    matrix_free(m, &err);
+    ck_assert_int_eq(err, SUCCESS);
+    matrix_free(transposed, &err);
+    ck_assert_int_eq(err, SUCCESS);
 }
 END_TEST
 

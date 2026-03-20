@@ -1,27 +1,36 @@
 cmake_minimum_required(VERSION 3.10)
-project(MatrixLab)
+project(MatrixLibrary VERSION 1.0.0 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
 
-set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include/")
-set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/")
+if(MINGW)
+    message(STATUS "MinGW detected: ${CMAKE_C_COMPILER}")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -g")
+endif()
 
-set(SOURCES
-    ${SRC_DIR}/main.c
-    ${SRC_DIR}/matrix.c
-    ${SRC_DIR}/matrix_info.c
-    ${SRC_DIR}/complex_num.c
-    ${SRC_DIR}/io.c
-)
+option(BUILD_TESTS "Build tests" ON)
+option(BUILD_APPS "Build applications" ON)
 
-add_executable(MatrixLab ${SOURCES})
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC OFF)
+set(CMAKE_AUTORCC OFF)
+set(CMAKE_AUTOUIC OFF)
 
-target_include_directories(MatrixLab PRIVATE ${INCLUDE_DIR})
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type" FORCE)
+endif()
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-if(MSVC)
-    target_compile_options(MatrixLab PRIVATE /W4 /WX) 
-else()
-    target_compile_options(MatrixLab PRIVATE -Wall -Wextra -Werror)
+add_subdirectory(src)
+
+if(BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
+
+if(BUILD_APPS)
+    add_subdirectory(apps)
 endif()

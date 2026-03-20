@@ -5,11 +5,16 @@
 
 typedef struct Matrix Matrix; 
 
-Matrix* matrix_create(int rows, int cols, MatrixInfo* field);
+Matrix* matrix_create(int rows, int cols, MatrixInfo* field, ErrorCode* err);
 Matrix* matrix_multiply(Matrix* a, Matrix* b, ErrorCode* err);
 Matrix* matrix_add(Matrix* a, Matrix* b, ErrorCode* err);
 Matrix* matrix_transpose(Matrix* m, ErrorCode* err);
-int matrix_set(Matrix* m, int r, int c, void* value, ErrorCode* err);
+MatrixInfo* matrix_get_matrix_info(Matrix* m);
+int matrix_get_elem_size(Matrix * m);
+int matrix_get_rows(Matrix* m);
+int matrix_get_cols(Matrix* m);
+void matrix_set(Matrix* m, int r, int c, void* value, ErrorCode* err);
 void* matrix_get(Matrix* m, int r, int c, ErrorCode* err);
-void matrix_free(Matrix* m);
+void matrix_free(Matrix* m, ErrorCode* err);
 void matrix_print(Matrix* m, ErrorCode* err);
+void matrix_print_elem(Matrix* m, int r, int c, ErrorCode* err);
